@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="{{ url_for('static', path='/main.css') }}" />
   </head>
   <body>
-    <img src="{{ url_for('static', path='/dog.png') }}" class="icon" />
-    <h3>Name my pet</h3>
+    <img src="{{ url_for('static', path='/filter.png') }}" class="icon" style="width: 100px; height: 100px;" />
+    <h3>Filter my question</h3>
     <form action="/" method="post">
-      <input type="text" name="animal" placeholder="Enter an animal" autocomplete="off" required />
-      <input type="submit" value="Generate names" />
+      <input type="text" name="user" placeholder="Enter your question" autocomplete="off" required />
+      <input type="submit" value="Generate answers" />
     </form>
     {% if result %}
     <div class="result">{{ result }}</div>

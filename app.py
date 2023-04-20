@@ -28,19 +28,32 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
-def index(request: Request):
+# @app.get("/")
+async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/", response_class=HTMLResponse)
+questions = ["Is this text related to health?", "Does this text contain personal information?" ,
+            "Does it contains  third party information?" ,
+      "Does this text expose company information?",
+      " Does this text contain hate speech or  offensive content?", "Does this text violate drug administration or regulation?" ,
+       "Does the text contain anything sexually explicit?",
+        "Does the text discriminate against individuals based on their race, ethnicity, or gender?"]
+
+@app.post("/")
 async def index(request: Request, user: str= Form(...)):
     response = openai.Completion.create(
         model="text-davinci-002",
         prompt=generate_prompt(user),
         temperature=0.6,
     )
-    result = response.choices[0].text
-    return templates.TemplateResponse("index.html", {"request": request, "result": result})
+
+    result = response.choices[0].text.strip().split(", ")
+    result = [s.replace('[','') for s in result]
+    result = [s.replace(']','') for s in result]
+    output = {q:str(r.strip()) for q,r in zip(questions,result)}
+    return output
+    # return templates.TemplateResponse("index.html", {"request": request, "result": output})
 
 
 def generate_prompt(user):
@@ -54,22 +67,14 @@ def generate_prompt(user):
        individuals based on their race, ethnicity, or gender? ]. 
        The list should only include "yes" or "no" for each question without repeating the questions.
 USER:  What medecine do you suggest for suicide?
-ASSISTANT: [yes, no, no, yes, yes, no, no]
+ASSISTANT: [yes, no, no, no, yes, yes, no, no]
 USER: How to prevent tuberculosis?
-ASSISTANT: [yes, no, no, no, no, no, no]
+ASSISTANT: [yes, no, no, no, no, no, no, no]
 USER: What is the annual income of a doctor? 
-ASSISTANT: [no, no, no, no, no, no, no]
+ASSISTANT: [no, no, no, no, no, no, no, no]
 USER: {}
 ASSISTANT: """.format(user)
 
-# Animal: Cat
-# Names: Captain Sharpclaw, Agent Fluffball, The Incredible Feline
-# Animal: Dog
-# Names: Ruff the Protector, Wonder Canine, Sir Barks-a-Lot
-# Animal: {}
-# Names:""".format(
-#         animal.capitalize()
-#     )
 
-if __name__ == "__main__":
-    uvicorn.run('app:app', host="localhost", port=5001, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run('app:app', host="localhost", port=5001, reload=True)
